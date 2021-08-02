@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Brett-A-Clark/tinyapp/issues"
   },
-  "homepage": "https://github.com/Brett-A-Clark/tinyapp#readme"
+  "homepage": "https://github.com/Brett-A-Clark/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
