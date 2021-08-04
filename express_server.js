@@ -1,7 +1,9 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; 
+const cookieParser = require("cookie-parser");
 
+app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -58,6 +60,12 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortUrl/delete", (req, res) => {
   delete urlDatabase[req.params.shortUrl];
   res.redirect("/urls");
+});
+
+app.post("/urls/:shortUrl", (req, res) => {
+  const shortURL = req.params.shortUrl;
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.listen(PORT, () => {
