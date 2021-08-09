@@ -16,6 +16,8 @@ app.set("view engine", "ejs");
 const urlDatabase = {};
 const users = {};
 
+// Routes below
+
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -29,13 +31,13 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { 
-    user: users[req.session.user_ID] 
-  };
   if (!cookieTracker(req.session.user_ID, users)) {
-    res.redirect("/login)");
+    res.redirect("/login");
   } else {
-  res.render("urls_new", templateVars);
+    const templateVars = { 
+      user: users[req.session.user_ID] 
+    };
+    res.render("urls_new", templateVars);
   }
 });
 
@@ -103,6 +105,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
+// Login route
 app.get("/login", (req, res) => {
   const templateVars = { 
     user: users[req.session.user_ID] 
@@ -114,6 +117,7 @@ app.get("/login", (req, res) => {
   }
 });
 
+// Register Route
 app.get("/register", (req, res) => {
   const templateVars = { 
     user: users[req.session.user_ID] 
@@ -125,6 +129,7 @@ app.get("/register", (req, res) => {
   }
 });
 
+// Login Handler
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -142,6 +147,7 @@ app.post("/login", (req, res) => {
       res.redirect("/urls");
 });
 
+// Register Handler
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -162,6 +168,7 @@ app.post("/register", (req, res) => {
   }
 });
 
+// Logout Route
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
@@ -171,10 +178,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
