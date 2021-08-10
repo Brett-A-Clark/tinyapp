@@ -19,11 +19,15 @@ const users = {};
 // Routes below
 
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  if (cookieTracker(req.session.user_ID, users)) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/urls", (req, res) => {
-    let templateVars = {
+  const templateVars = {
     urls: urlsForUser(req.session.user_ID, urlDatabase),
     user: users[req.session.user_ID],
   };
@@ -43,15 +47,24 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
-    let templateVars = {
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL].longURL,
-      urlUserID: urlDatabase[req.params.shortURL].userID,
-      user: users[req.session.user_ID],
+
+    const { shortURL } = req.params;
+    const urlObject = urlDatabase[shortURL];
+    const { longURL, userID} = urlObject;
+
+    const {user_ID } = req.session;
+    const user = users[user_ID];
+
+    const templateVars = {
+      shortURL,
+      longURL, 
+      urlUserID: userID,
+      user, 
     };
+    if (cookieTracker(req.session.user_ID, users)) 
     res.render("urls_show", templateVars);
   } else {
-    res.status(404).send("Sorry the page could not be found.");
+    res.status(403).send("Request denied. Please provide valid authentication credentials.");
   }
 });
 
@@ -82,15 +95,16 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
   const userID = req.session.user_ID;
-  const userUrls = urlsForUser(userID, urlDatabase);
-  if (Object.keys(userUrls).includes(req.params.id)) {
-    const shortURL = req.params.id;
-    urlDatabase[shortURL].longURL = req.body.newURL;
-    res.redirect('/urls');
-  } else {
-    res.status(401).send("Request denied. Please provide valid authentication credentials");
+
+  if (urlDatabase[req.params.shortURL]["userID"] !== userID) {
+    return res.status(401).send("Request denied. Please provide valid authentication credentials");
   }
+  if (req.body["newURL"]) {
+    urlDatabase[shortURL]["longURL"] = req.body["newURL"];
+  }
+    res.redirect(`/urls/${req.params.shortURL}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
